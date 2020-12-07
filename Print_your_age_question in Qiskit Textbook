@@ -1,0 +1,34 @@
+# PRINTING MY AGE (19) USING QUANTUM CIRCUITS
+import numpy as np
+import pandas as pd
+import qiskit as qs
+from qiskit import QuantumCircuit, execute, Aer
+from qiskit.visualization import plot_histogram
+
+n = 8
+n_q = n
+n_b = n
+qc_output = QuantumCircuit(n_q,n_b)
+
+for j in range(n):
+    qc_output.measure(j,j)
+    #Circuit will print every output as 0 with 100% probability
+qc_output.draw()
+
+counts= execute(qc_output,Aer.get_backend('qasm_simulator')).result().get_counts()
+plot_histogram(counts) 
+
+qc_encode = QuantumCircuit(n)
+qc_encode.x(0)
+qc_encode.x(1)
+qc_encode.x(4)
+#Circuit passes NOT gate to the required positions 
+qc_encode.draw()
+
+qc1= qc_encode+ qc_output
+
+qc1.draw()
+
+counts= execute(qc1,Aer.get_backend("qasm_simulator")).result().get_counts()
+plot_histogram(counts)
+ # 00010011 (binary) = 19 (decimal) is printed.
