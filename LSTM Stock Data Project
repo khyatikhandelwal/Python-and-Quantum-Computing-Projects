@@ -1,0 +1,79 @@
+import pandas as pd
+import numpy as np
+pip install Keras
+pip install pandas-datareader
+import pandas_datareader as pdr
+#Collect Apple's Stock Data
+key='09dfd36db82b8087f3b269cbb1882a9cf5b3c947'
+
+
+data_frame= pdr.get_data_tiingo("AAPL",api_key=key)
+data_frame.to_csv("AAPL.csv")
+data_frame_2=data_frame.reset_index()["close"]
+data_frame_2[1228:]
+
+df1=data_frame.reset_index()["close"]
+df1.shape
+(1256,)
+import matplotlib.pyplot as plt
+plt.plot(df1)
+
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+scaler=MinMaxScaler(feature_range=(0,1))
+df1=scaler.fit_transform(np.array(df1).reshape(-1,1))
+df1.shape
+
+#Categorizing Data into Train data and Test data
+
+training_data=int(len(df1)*0.70) # using 70% os data to train and remaining 30 % to test
+testing_data=int(len(df1)*0.3)
+train_data,test_data=df1[0:training_data,:],df1[training_data:len(df1),:1]
+training_data,testing_data
+(879, 376)
+len(test_data)
+
+#Train the data
+import numpy as np
+def create_dataset (dataset, time_steps=1):
+    dataX, dataY = [] , []
+    for i in range(len(dataset)-time_steps-1):
+        a= dataset[i:(i+ time_step) , 0]
+        dataX.append(a)
+        dataY.append(dataset[i+ time_step, 0])
+    return np.array(dataX),np.array(dataY)
+time_steps=100
+X_Train, Y_Train = create_dataset (train_data, time_steps)
+X_Test, Y_Test = create_dataset (test_data, time_steps)
+print(X_Train)
+
+#Reshaping the train data into 3dimensional to apply LSTM
+#making data into [samples, time steps, features]
+X_Train= X_Train.reshape(X_Train.shape[0],X_Train.shape[1], 1)
+X_Test= X_Test.reshape(X_Test.shape[0],X_Test.shape[1], 1)
+
+#The LSTM Model
+from tensorflow.keras.models import Sequential 
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM
+#Stacking LSTM Model
+model= Sequential()
+model.add(LSTM(50, return_sequences=True,input_shape=(100,1)))
+model.add(LSTM(50,return_sequences=True))
+model.add(LSTM(50))
+model.add(Dense(1))
+
+model.compile(loss="mean_squared_error",optimizer="adam")
+
+
+model.summary()
+
+model.fit(X_Train, Y_Train , validation_data=(X_Test, Y_Test), epochs=100, batch_size=64, verbose=1)
+
+train_Prediction = model.predict(X_Train)
+test_Prediction= model.predict(X_Test)
+
+#Scaling back to original form
+train_Predict=scaler.inverse_transform(train_Predict)
+tset_Predict=scaler.inverse_transform(test_Predict)
