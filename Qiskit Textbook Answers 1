@@ -1,0 +1,51 @@
+#Exercise 3.3 Q1)
+
+%matplotlib inline
+# Importing standard Qiskit libraries
+from qiskit import QuantumCircuit, execute, Aer, IBMQ
+from qiskit.compiler import transpile, assemble
+from qiskit.tools.jupyter import *
+from qiskit.visualization import *
+from iqx import *
+
+qc_a = QuantumCircuit(2)
+qc_a.x(0)
+qc_a.h(0)
+qc_a.cx(0,1)
+
+qc_a.draw()
+
+from qiskit import *
+from qiskit.visualization import plot_bloch_multivector, plot_histogram
+backend = Aer.get_backend("statevector_simulator")
+results = execute(qc_a,backend).result().get_statevector()
+
+print(results)
+
+backend = Aer.get_backend("statevector_simulator")
+results = execute(qc_a,backend).result().get_counts()
+plot_histogram(results)
+
+
+-----------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
+
+#Exercise 3.3 Q1)
+qc_a = QuantumCircuit(2)
+qc_a.x(0)
+qc_a.h(1)
+
+qc_a.cx(1,0)
+
+qc_a.draw()
+
+backend = Aer.get_backend("statevector_simulator")
+abc = execute(qc_a,backend).result().get_counts()
+
+print(abc) 
+plot_histogram(abc)
+
+#3.3 part 2 of same question
+backend= Aer.get_backend("unitary_simulator")
+xyz= execute(qc_a,backend).result().get_unitary()
+print(xyz)
