@@ -1,0 +1,875 @@
+Functions:
+        __init__(): Intialises neccassary object variables to be used by object later:
+            self.data= Used to store copy of "sliced_data"
+            self.index= Stores Index of self.data
+            self.columns=List of columns of self.data
+            self.highindex= Stores index of "High"
+            self.closeindex= Stores index of "Close"
+            self.lowindex= Stores index of "Low"
+            self.openindex=Stores index of "Open"
+            self.volumeindex=Stores index of "Volume"
+            self.avg_volumeindex=Stores index of "AVG_VOLUME"
+            self.ema50index=Stores index of "EMA50"
+            self.ema100index=Stores index of "EMA100"
+            self.ema200index=Stores index of "EMA200"
+            self.ema25index=Stores index of "EMA25"
+            self.ema9index=Stores index of "EMA9"
+            self.ema21index=Stores index of "EMA21"
+            self.macdindex=Stores index of "MACD"
+            self.ema_macdindex=Stores index of "EMA_MACD"
+            self.sma20index=Stores index of "SMA20"
+            self.bol_upindex=Stores index of "BOL_UP"
+            self.bol_lowindex=Stores index of "BOL_LOW"
+
+        bullish_marubozu(): Checks for bullish marubozu candlestick pattern.
+
+        bearish_marubozu(): Checks for bearish marubozu candlestick pattern.
+
+        spining_top(): Checks for spinning top candlestick pattern
+
+        doji(): Checks for doji candlestick pattern
+
+        downtrend(): Checks if the market is in a downward trend.
+
+        uptrend(): Checks if the market is in an upward trend.
+
+        bullish_hammer() : Checks for bullish hammer candlestick pattern
+
+        bearish_hanging_man(): Checks for bearish hanging man candlestick pattern
+
+        bearish_shooting_star(): Checks for bearish shooting star candlestick pattern
+
+        bullish_inverted_hammer(): Checks for bullish inverted hammer candlestick pattern
+
+        bullish_engulfing(): Checks for bullish engulfing candlestick pattern
+
+        bearish_engulfing(): Checks for bearish engulfing candlestick pattern
+
+        bullish_piercing_pattern(): Checks for bullish piercing candlestick pattern
+
+        bearish_dark_cloud_cover(): Checks for bearish dark cloud cover candlestick pattern
+
+        bearish_harami() : Checks for bearish harami candlestick pattern
+
+        bullish_harami() : Checks for bullish harami candlestick pattern
+
+        bullish_morning_star(): Checks for bullish morning star candlestick pattern
+
+        bearish_evening_star(): Checks for bearish evening star candlestick pattern
+
+        volume(): Checks if the volume traded on that day is greater or smaller than Last 10 days average volume
+
+        bullish_ema_50_100(): Checks if EMA 50 is greater than EMA 100
+
+        bullish_ema_100_200(): Checks if EMA 100 is greater than EMA 200
+
+        bullish_ema_25_50(): Checks if EMA 25 is greater than EMA 200
+
+        bullish_ema_9_21(): Checks if EMA 9 is greater than EMA 21
+
+        bullish_macd(): Checks if MACD is greater than EMA_MACD
+
+        bearish_macd(): Checks if MACD is less than EMA_MACD
+
+        bullish_bollinger(): Checks if price is less than BOL_LOW
+
+        bearish_bollinger(): Checks if price is greater than BOL_UP
+
+
+    '''
+    def __init__(self, sliced_data):
+        self.data = copy.deepcopy(sliced_data)
+        self.index = self.data.index
+        self.columns = list(self.data.columns)
+        self.highindex = self.columns.index("High")
+        self.lowindex = self.columns.index("Low")
+        self.openindex = self.columns.index("Open")
+        self.closeindex = self.columns.index("Close")
+        self.volumeindex = self.columns.index("Volume")
+        self.avg_volumeindex = self.columns.index("AVG_VOLUME")
+        self.ema50index = self.columns.index("EMA50")
+        self.ema100index = self.columns.index("EMA100")
+        self.ema200index = self.columns.index("EMA200")
+        self.ema25index = self.columns.index('EMA25')
+        self.ema9index = self.columns.index('EMA9')
+        self.ema21index = self.columns.index("EMA21")
+        self.macdindex = self.columns.index("MACD")
+        self.ema_macdindex = self.columns.index("EMA_MACD")
+        self.sma20index = self.columns.index("SMA20")
+        self.bol_upindex = self.columns.index("BOL_UP")
+        self.bol_lowindex = self.columns.index("BOL_LOW")
+
+    def bullish_marubozu(self):
+        buy_price = None
+        stop_loss = None
+        pattern = False
+        high = self.data.iat[-1, self.highindex]
+        open = self.data.iat[-1, self.openindex]
+        close = self.data.iat[-1, self.closeindex]
+        low = self.data.iat[-1, self.lowindex]
+
+        if close >= open:
+
+            if (open - low) <= (open * 0.01) and (close - high) <= (close * 0.01):
+                pattern = True
+                buy_price = close
+                stop_loss = low
+
+        return (pattern, buy_price, stop_loss)
+
+    def bearish_marubozu(self):
+        sell_price = None
+        stop_loss = None
+        pattern = False
+        index = self.index[-1]
+        high = self.data.at[index, "High"]
+        open = self.data.at[index, "Open"]
+        close = self.data.at[index, "Close"]
+        low = self.data.at[index, "Low"]
+        if close <= open:
+
+            if abs(open - high) <= (open * 0.01) and abs(close - low) <= (close * 0.01):
+                pattern = True
+                sell_price = close
+                stop_loss = high
+
+        return (pattern, sell_price, stop_loss)
+
+    def spinning_top(self):
+        buy_price = None
+        stop_loss = None
+        pattern = False
+        index = self.index[-1]
+        high = self.data.at[index, "High"]
+        open = self.data.at[index, "Open"]
+        close = self.data.at[index, "Close"]
+        low = self.data.at[index, "Low"]
+
+        if open >= close:
+            uppershadow = abs(high - open)
+            lowershadow = abs(close - low)
+
+            if abs(open - close) <= 0.03 * close and abs(uppershadow - lowershadow) <= 0.03 * uppershadow:
+                pattern = True
+        else:
+            uppershadow = abs(high - close)
+            lowershadow = abs(open - low)
+
+            if abs(open - close) <= 0.03 * open and abs(uppershadow - lowershadow) <= 0.03 * lowershadow:
+                pattern = True
+
+        return (pattern, buy_price, stop_loss)
+
+    def doji(self):
+        buy_price = None
+        stop_loss = None
+        pattern = False
+        index = self.index[-1]
+        open = self.data.at[index, "Open"]
+        close = self.data.at[index, "Close"]
+
+        if abs(open - close) <= 0.03 * open or abs(open - close) <= 0.03 * close:
+            pattern = True
+
+        return (pattern, buy_price, stop_loss)
+
+    def downtrend(self):
+        pattern = False
+        prev_day_close = self.data.iat[-2, self.closeindex]
+        ten_day_close = self.data.iat[-10, self.closeindex]
+        if ten_day_close > prev_day_close:
+
+            if abs(ten_day_close - prev_day_close) >= 0.05 * ten_day_close:
+                pattern = True
+
+        return pattern
+
+    def uptrend(self):
+        pattern = False
+        prev_day_close = self.data.iat[-2, self.closeindex]
+        ten_day_close = self.data.iat[-10, self.closeindex]
+
+        if prev_day_close > ten_day_close:
+            if abs(prev_day_close - ten_day_close) >= 0.05 * prev_day_close:
+                pattern = True
+
+        return pattern
+
+    def bullish_hammer(self):
+        buy_price = None
+        stop_loss = None
+        pattern = False
+        index = self.index[-1]
+        high = self.data.at[index, "High"]
+        open = self.data.at[index, "Open"]
+        close = self.data.at[index, "Close"]
+        low = self.data.at[index, "Low"]
+        body = None
+        lowershadow = None
+
+        if open >= close:
+            if abs(high - open) <= 0.02 * high:
+                body = open - close
+                lowershadow = close - low
+
+
+        else:
+            if abs(high - close) <= 0.02 * high:
+                body = close - open
+                lowershadow = open - low
+
+        if lowershadow != None and body != None:
+            if lowershadow >= 2 * body:
+                check_downtrend = self.downtrend()
+                if check_downtrend:
+                    pattern = True
+                    buy_price = close
+                    stop_loss = low
+
+        return (pattern, buy_price, stop_loss)
+
+    def bearish_hanging_man(self):
+        sell_price = None
+        stop_loss = None
+        pattern = False
+        index = self.index[-1]
+        high = self.data.at[index, "High"]
+        open = self.data.at[index, "Open"]
+        close = self.data.at[index, "Close"]
+        low = self.data.at[index, "Low"]
+        body = None
+        lowershadow = None
+
+        if open >= close:
+            if abs(high - open) <= 0.02 * high:
+                body = open - close
+                lowershadow = close - low
+
+
+        else:
+            if abs(high - close) <= 0.02 * high:
+                body = close - open
+                lowershadow = open - low
+
+        if lowershadow != None and body != None:
+
+            if lowershadow >= 2 * body:
+                check_uptrend = self.uptrend()
+                if check_uptrend:
+                    pattern = True
+                    sell_price = close
+                    stop_loss = high
+
+        return (pattern, sell_price, stop_loss)
+
+    def bearish_shooting_star(self):
+        pattern = False
+        sell_price = None
+        stop_loss = None
+        index = self.index[-1]
+        high = self.data.at[index, "High"]
+        open = self.data.at[index, "Open"]
+        close = self.data.at[index, "Close"]
+        low = self.data.at[index, "Low"]
+        body = None
+        uppershadow = None
+
+        if open >= close:
+            if abs(close - low) <= 0.02 * close:
+                body = open - close
+                uppershadow = high - open
+        else:
+            if abs(close - low) <= 0.02 * close:
+                body = close - open
+                uppershadow = high - close
+
+        if uppershadow != None and body != None:
+            if uppershadow >= 2 * body:
+                check_uptrend = self.uptrend()
+                if check_uptrend:
+                    pattern = True
+                    sell_price = close
+                    stop_loss = high
+
+        return (pattern, sell_price, stop_loss)
+
+    def bullish_inverted_hammer(self):
+        pattern = False
+        buy_price = None
+        stop_loss = None
+        index = self.index[-1]
+        high = self.data.at[index, "High"]
+        open = self.data.at[index, "Open"]
+        close = self.data.at[index, "Close"]
+        low = self.data.at[index, "Low"]
+        body = None
+        uppershadow = None
+
+        if open >= close:
+            if abs(close - low) <= 0.02 * close:
+                body = open - close
+                uppershadow = high - open
+        else:
+            if abs(close - low) <= 0.02 * close:
+                body = close - open
+                uppershadow = high - close
+
+        if uppershadow != None and body != None:
+            if uppershadow >= 2 * body:
+                check_downtrend = self.downtrend()
+                if check_downtrend:
+                    pattern = True
+                    buy_price = close
+                    stop_loss = low
+
+        return (pattern, buy_price, stop_loss)
+
+    def bullish_engulfing(self):
+        pattern = False
+        buy_price = None
+        stop_loss = None
+        prev_day_open = self.data.iat[-2, self.openindex]
+        prev_day_close = self.data.iat[-2, self.closeindex]
+        prev_day_low = self.data.iat[-2, self.lowindex]
+        current_day_close = self.data.iat[-1, self.closeindex]
+        current_day_open = self.data.iat[-1, self.openindex]
+        current_day_low = self.data.iat[-1, self.lowindex]
+        if current_day_low <= prev_day_low:
+            low = current_day_low
+        else:
+            low = prev_day_low
+
+        if prev_day_close <= prev_day_open:
+            if current_day_open <= prev_day_close and current_day_close > current_day_open:
+                prev_day_body = prev_day_open - prev_day_close
+                current_body = current_day_close - current_day_open
+
+                if current_body > prev_day_body:
+                    check_downtrend = self.downtrend()
+                    if check_downtrend:
+                        pattern = True
+                        buy_price = current_day_close
+                        stop_loss = low
+        return (pattern, buy_price, stop_loss)
+
+    def bearish_engulfing(self):
+        pattern = False
+        sell_price = None
+        stop_loss = None
+        prev_day_open = self.data.iat[-2, self.openindex]
+        prev_day_close = self.data.iat[-2, self.closeindex]
+        prev_day_high = self.data.iat[-2, self.highindex]
+        current_day_close = self.data.iat[-1, self.closeindex]
+        current_day_open = self.data.iat[-1, self.openindex]
+        current_day_high = self.data.iat[-1, self.highindex]
+        if current_day_high >= prev_day_high:
+            high = current_day_high
+        else:
+            high = prev_day_high
+
+        if prev_day_close >= prev_day_open:
+            if current_day_open >= prev_day_close and current_day_close < current_day_open:
+                prev_day_body = prev_day_close - prev_day_open
+                current_day_body = current_day_close - current_day_open
+                if current_day_body > prev_day_body:
+                    check_uptrend = self.uptrend()
+                    if check_uptrend:
+                        pattern = True
+                        sell_price = current_day_close
+                        stop_loss = high
+        return (pattern, sell_price, stop_loss)
+
+    def bullish_piercing_pattern(self):
+        pattern = False
+        buy_price = None
+        stop_loss = None
+        prev_day_open = self.data.iat[-2, self.openindex]
+        prev_day_close = self.data.iat[-2, self.closeindex]
+        prev_day_low = self.data.iat[-2, self.lowindex]
+        current_day_close = self.data.iat[-1, self.closeindex]
+        current_day_open = self.data.iat[-1, self.openindex]
+        current_day_low = self.data.iat[-1, self.lowindex]
+        if current_day_low <= prev_day_low:
+            low = current_day_low
+        else:
+            low = prev_day_low
+
+        if prev_day_close <= prev_day_open:
+            if current_day_open <= prev_day_close and current_day_close > current_day_open:
+                prev_day_body = prev_day_open - prev_day_close
+                current_body = current_day_close - current_day_open
+
+                if prev_day_body > current_body > 0.5 * prev_day_body:
+                    check_downtrend = self.downtrend()
+                    if check_downtrend:
+                        pattern = True
+                        buy_price = current_day_close
+                        stop_loss = low
+        return (pattern, buy_price, stop_loss)
+
+    def bearish_dark_cloud_cover(self):
+        pattern = False
+        sell_price = None
+        stop_loss = None
+        prev_day_open = self.data.iat[-2, self.openindex]
+        prev_day_close = self.data.iat[-2, self.closeindex]
+        prev_day_high = self.data.iat[-2, self.highindex]
+        current_day_close = self.data.iat[-1, self.closeindex]
+        current_day_open = self.data.iat[-1, self.openindex]
+        current_day_high = self.data.iat[-1, self.highindex]
+        if current_day_high >= prev_day_high:
+            high = current_day_high
+        else:
+            high = prev_day_high
+
+        if prev_day_close >= prev_day_open:
+            if current_day_open >= prev_day_close and current_day_close < current_day_open:
+                prev_day_body = prev_day_close - prev_day_open
+                current_day_body = current_day_close - current_day_open
+                if prev_day_body > current_day_body > 0.5 * prev_day_body:
+                    check_uptrend = self.uptrend()
+                    if check_uptrend:
+                        pattern = True
+                        sell_price = current_day_close
+                        stop_loss = high
+        return (pattern, sell_price, stop_loss)
+
+    def bullish_harami(self):
+        pattern = False
+        buy_price = None
+        stop_loss = None
+        prev_day_open = self.data.iat[-2, self.openindex]
+        prev_day_close = self.data.iat[-2, self.closeindex]
+        prev_day_low = self.data.iat[-2, self.lowindex]
+        current_day_close = self.data.iat[-1, self.closeindex]
+        current_day_open = self.data.iat[-1, self.openindex]
+        current_day_low = self.data.iat[-1, self.lowindex]
+        if current_day_low <= prev_day_low:
+            low = current_day_low
+        else:
+            low = prev_day_low
+
+        if prev_day_close < prev_day_open:
+            if current_day_open > prev_day_close and current_day_close < prev_day_open:
+                check_downtrend = self.downtrend()
+                if check_downtrend:
+                    pattern = True
+                    buy_price = current_day_close
+                    stop_loss = low
+        return (pattern, buy_price, stop_loss)
+
+    def bearish_harami(self):
+        pattern = False
+        sell_price = None
+        stop_loss = None
+        prev_day_open = self.data.iat[-2, self.openindex]
+        prev_day_close = self.data.iat[-2, self.closeindex]
+        prev_day_high = self.data.iat[-2, self.highindex]
+        current_day_close = self.data.iat[-1, self.closeindex]
+        current_day_open = self.data.iat[-1, self.openindex]
+        current_day_high = self.data.iat[-1, self.highindex]
+        if current_day_high >= prev_day_high:
+            high = current_day_high
+        else:
+            high = prev_day_high
+
+        if prev_day_close > prev_day_open:
+            if current_day_open < prev_day_close and current_day_close > prev_day_open:
+                check_uptrend = self.uptrend()
+                if check_uptrend:
+                    pattern = True
+                    sell_price = current_day_close
+                    stop_loss = high
+
+        return (pattern, sell_price, stop_loss)
+
+    def bullish_morning_star(self):
+        pattern = False
+        buy_price = None
+        stop_loss = None
+
+        day1_close = self.data.iat[-3, self.closeindex]
+        day1_open = self.data.iat[-3, self.openindex]
+        day2_open = self.data.iat[-2, self.openindex]
+        day2_close = self.data.iat[-2, self.closeindex]
+        day1_low = self.data.iat[-3, self.lowindex]
+        day2_low = self.data.iat[-2, self.lowindex]
+        day3_low = self.data.iat[-1, self.lowindex]
+        low = min(day1_low, day2_low, day3_low)
+        check_downtrend = self.downtrend()
+        if check_downtrend:
+
+            if day1_close < day1_open:
+                if day2_open < day1_close:
+                    day2_data_slice = self.data.iloc[:-1, :]
+                    day2_technical_analysis = Technical_analysis(day2_data_slice)
+                    check_doji, _, _ = day2_technical_analysis.doji()
+                    check_spining_top, _, _ = day2_technical_analysis.spinning_top()
+
+                    if check_doji or check_spining_top:
+                        day3_open = self.data.iat[-1, self.openindex]
+                        day3_close = self.data.iat[-1, self.closeindex]
+                        if day3_open > day2_close and day3_close > day1_open:
+                            pattern = True
+                            buy_price = day3_close
+                            stop_loss = low
+        return (pattern, buy_price, stop_loss)
+
+    def bearish_evening_star(self):
+        pattern = False
+        sell_price = None
+        stop_loss = None
+        day1_close = self.data.iat[-3, self.closeindex]
+        day1_open = self.data.iat[-3, self.openindex]
+        day2_open = self.data.iat[-2, self.openindex]
+        day2_close = self.data.iat[-2, self.closeindex]
+        day1_high = self.data.iat[-3, self.highindex]
+        day2_high = self.data.iat[-2, self.highindex]
+        day3_high = self.data.iat[-1, self.highindex]
+        low = min(day1_high, day2_high, day3_high)
+        check_uptrend = self.uptrend()
+        if check_uptrend:
+
+            if day1_close > day1_open:
+                if day2_open > day1_close:
+                    day2_data_slice = self.data.iloc[:-1, :]
+                    day2_technical_analysis = Technical_analysis(day2_data_slice)
+                    check_doji, _, _ = day2_technical_analysis.doji()
+                    check_spining_top, _, _ = day2_technical_analysis.spinning_top()
+
+                    if check_doji or check_spining_top:
+                        day3_open = self.data.iat[-1, self.openindex]
+                        day3_close = self.data.iat[-1, self.closeindex]
+                        if day3_open < day2_close and day3_close < day1_open:
+                            pattern = True
+                            sell_price = day3_close
+                            stop_loss = low
+        return (pattern, sell_price, stop_loss)
+
+    def volume(self):
+        avg_volume = self.data.iat[-1, self.avg_volumeindex]
+        today_volume = self.data.iat[-1, self.volumeindex]
+
+        if today_volume >= avg_volume:
+            return True
+
+        return False
+
+    def bullish_ema_50_100(self):
+        ema50 = self.data.iat[-1, self.ema50index]
+        ema100 = self.data.iat[-1, self.ema100index]
+        pattern = False
+        buy_price = None
+        stop_loss = None
+
+        if ema50 > ema100:
+            pattern = True
+            buy_price = self.data.iat[-1, self.closeindex]
+
+        return (pattern, buy_price, stop_loss)
+
+    def bullish_ema_9_21(self):
+        ema9 = self.data.iat[-1, self.ema9index]
+        ema21 = self.data.iat[-1, self.ema21index]
+        pattern = False
+        buy_price = None
+        stop_loss = None
+
+        if ema9 > ema21:
+            pattern = True
+            buy_price = self.data.iat[-1, self.closeindex]
+
+        return (pattern, buy_price, stop_loss)
+
+    def bullish_ema_25_50(self):
+        ema50 = self.data.iat[-1, self.ema50index]
+        ema25 = self.data.iat[-1, self.ema25index]
+        pattern = False
+        buy_price = None
+        stop_loss = None
+
+        if ema25 > ema50:
+            pattern = True
+            buy_price = self.data.iat[-1, self.closeindex]
+
+        return (pattern, buy_price, stop_loss)
+
+    def bullish_ema_100_200(self):
+        ema200 = self.data.iat[-1, self.ema200index]
+        ema100 = self.data.iat[-1, self.ema100index]
+        pattern = False
+        buy_price = None
+        stop_loss = None
+
+        if ema100 > ema200:
+            pattern = True
+            buy_price = self.data.iat[-1, self.closeindex]
+
+        return (pattern, buy_price, stop_loss)
+
+    def bullish_macd(self):
+        macd = self.data.iat[-1, self.macdindex]
+        ema_macd = self.data.iat[-1, self.ema_macdindex]
+        pattern = False
+        buy_price = None
+        stop_loss = None
+
+        if macd > ema_macd:
+            pattern = True
+            buy_price = self.data.iat[-1, self.closeindex]
+
+        return (pattern, buy_price, stop_loss)
+
+    def bearish_macd(self):
+        macd = self.data.iat[-1, self.macdindex]
+        ema_macd = self.data.iat[-1, self.ema_macdindex]
+        pattern = False
+        sell_price = None
+        stop_loss = None
+
+        if macd < ema_macd:
+            pattern = True
+            sell_price = self.data.iat[-1, self.closeindex]
+
+        return (pattern, sell_price, stop_loss)
+
+    def bullish_bollinger(self):
+        pattern = False
+        buy_price = None
+        stop_loss = None
+
+        bol_low = self.data.iat[-1, self.bol_lowindex]
+
+        close = self.data.iat[-1, self.closeindex]
+
+        if close <= bol_low:
+            pattern = True
+            buy_price = close
+
+        return (pattern, buy_price, stop_loss)
+
+    def bearish_bollinger(self):
+        pattern = False
+        sell_price = None
+        stop_loss = None
+        bol_up = self.data.iat[-1, self.bol_upindex]
+        close = self.data.iat[-1, self.closeindex]
+
+        if close >= bol_up:
+            pattern = True
+            sell_price = close
+
+        return (pattern, sell_price, stop_loss)
+
+
+class Logic(object):
+    def __init__(self, Technical_analysis, weights):
+        self.tech_analysis = Technical_analysis
+        self.weights = weights
+        self.long = 0
+        self.short = 0
+        self.long_cash = None
+        self.short_cash = None
+
+    def long_call(self):
+
+        bullish_marubozu = self.tech_analysis.bullish_marubozu()
+        if bullish_marubozu[0] == True:
+            self.long += self.weights["bullish_marubozu"]
+            # print("bullish marubozu")
+
+        bullish_hammer = self.tech_analysis.bullish_hammer()
+        if bullish_hammer[0] == True:
+            self.long += self.weights["bullish_hammer"]
+            # print("bullish hammer")
+
+        bullish_inverted_hammer = self.tech_analysis.bullish_inverted_hammer()
+        if bullish_inverted_hammer[0] == True:
+            self.long += self.weights["bullish_inverted_hammer"]
+            # print("bullish inverted hammer")
+
+        bullish_engulfing = self.tech_analysis.bullish_engulfing()
+        if bullish_engulfing[0] == True:
+            self.long += self.weights["bullish_engulfing"]
+            # print("bullish engulfing")
+
+        bullish_piercing_pattern = self.tech_analysis.bullish_piercing_pattern()
+        if bullish_piercing_pattern[0] == True:
+            self.long += self.weights["bullish_piercing_pattern"]
+            # print("bullish piercing pattern")
+
+        bullish_harami = self.tech_analysis.bullish_harami()
+        if bullish_harami[0] == True:
+            self.long += self.weights["bullish_harami"]
+            # print("bullish harami")
+
+        bullish_morning_star = self.tech_analysis.bullish_morning_star()
+        if bullish_morning_star[0] == True:
+            self.long += self.weights["bullish_morning_star"]
+            # print("bullish morning star")
+
+        volume = self.tech_analysis.volume()
+        if volume == True:
+            self.long += self.weights["volume"]
+
+        if 0.10 < self.long <= 0.20:
+            self.long_cash = 0.05
+
+        elif 0.20 < self.long <= 0.30:
+            self.long_cash = 0.06
+
+        elif 0.30 < self.long <= 0.40:
+            self.long_cash = 0.07
+
+        elif 0.40 < self.long <= 0.50:
+            self.long_cash = 0.08
+
+        elif 0.50 < self.long <= 0.60:
+            self.long_cash = 0.09
+
+        elif 0.60 < self.long <= 0.70:
+            self.long_cash = 0.10
+
+        elif 0.70 < self.long <= 0.80:
+            self.long_cash = 0.11
+
+        elif self.long > 0.80:
+            self.long_cash = 0.15
+
+        return self.long_cash
+
+    def short_call(self):
+        bearish_marubozu=self.tech_analysis.bearish_marubozu()
+        if bearish_marubozu[0]==True:
+            self.short +=self.weights["bearish_marubozu"]
+            # print("bearish_marubozu")
+
+        bearish_hanging_man = self.tech_analysis.bearish_hanging_man()
+        if bearish_hanging_man[0] == True:
+            self.short += self.weights["bearish_hanging_man"]
+            # print("bearish_hanging_man")
+
+        bearish_shooting_star = self.tech_analysis.bearish_shooting_star()
+        if bearish_shooting_star[0] == True:
+            self.short += self.weights["bearish_shooting_star"]
+            # print("bearish_shooting_star")
+
+        bearish_engulfing = self.tech_analysis.bearish_engulfing()
+        if bearish_engulfing[0] == True:
+            self.short += self.weights["bearish_engulfing"]
+            # print("bearish_engulfing")
+
+        bearish_dark_cloud_cover = self.tech_analysis.bearish_dark_cloud_cover()
+        if bearish_dark_cloud_cover[0] == True:
+            self.short += self.weights["bearish_dark_cloud_cover"]
+            # print("bearish_dark_cloud_cover")
+
+        bearish_harami = self.tech_analysis.bearish_harami()
+        if bearish_harami[0] == True:
+            self.short += self.weights["bearish_harami"]
+            # print("bearish_harami")
+
+        bearish_evening_star = self.tech_analysis.bearish_evening_star()
+        if bearish_evening_star[0] == True:
+            self.short += self.weights["bearish_evening_star"]
+            # print("bearish_evening_star")
+
+        volume = self.tech_analysis.volume()
+        if volume == True:
+            self.short += self.weights["volume"]
+
+        if 0 < self.short <= 0.20:
+            self.short_cash = 0.05
+
+        elif 0.20 < self.short <= 0.30:
+            self.short_cash = 0.06
+
+        elif 0.30 < self.short <= 0.40:
+            self.short_cash = 0.07
+
+        elif 0.40 < self.short <= 0.50:
+            self.short_cash = 0.08
+
+        elif 0.50 < self.short <= 0.60:
+            self.short_cash = 0.09
+
+        elif 0.60 < self.short <= 0.70:
+            self.short_cash = 0.10
+
+        elif 0.70 < self.short <= 0.80:
+            self.short_cash = 0.11
+
+        elif self.short > 0.80:
+            self.short_cash = 0.15
+
+        return self.short_cash
+
+    def ema_50_100(self):
+
+        ema = self.tech_analysis.bullish_ema_50_100()
+        cash = 0.10
+        return (ema, cash)
+
+    def ema_100_200(self):
+
+        ema = self.tech_analysis.bullish_ema_100_200()
+        cash = 0.20
+        return (ema, cash)
+
+    def ema_25_50(self):
+
+        ema = self.tech_analysis.bullish_ema_25_50()
+        cash = 0.10
+        return (ema, cash)
+
+    def ema_9_21(self):
+
+        ema = self.tech_analysis.bullish_ema_9_21()
+        cash = 0.05
+        return (ema, cash)
+
+    def bullish_bollinger(self):
+        long_bollinger, _, _ = self.tech_analysis.bullish_bollinger()
+        cash = 0.10
+        return (long_bollinger, cash)
+
+    def bullish_macd(self):
+        long_macd, _, _ = self.tech_analysis.bullish_macd()
+        cash = 0.10
+        return (long_macd, cash)
+
+
+class Backtest(object):
+    def __init__(self, Portfolio, stocks_data_frame, weights, start_date, end_date):
+        self.stocks_data_frame = stocks_data_frame
+        self.portfolio = Portfolio
+        self.start_date = start_date
+        self.end_date = end_date
+        self.weights = weights
+        self.worth=[]
+        self.date=[]
+        self.intial_invest=self.portfolio.get_long_cash()
+        self.total_invested=self.portfolio.get_long_cash()
+
+        self.msft = self.stocks_data_frame["TCS.NS"]
+
+
+
+        columns = list(self.msft.columns)
+        self.columnsindex = {}
+        self.columnsindex["Close"] = columns.index("Close")
+        self.columnsindex["EMA50"] = columns.index("EMA50")
+        self.columnsindex["EMA100"] = columns.index("EMA100")
+        self.columnsindex["EMA200"] = columns.index("EMA200")
+        self.columnsindex["EMA25"] = columns.index("EMA25")
+        self.columnsindex["EMA9"] = columns.index("EMA9")
+        self.columnsindex["EMA21"] = columns.index("EMA21")
+
+        start_date_timestamp = pd.Timestamp(start_date)
+        end_date_timestamp = pd.Timestamp(end_date)
+        self.start_date_index = list(self.msft.index).index(start_date_timestamp)
+        self.end_date_index = list(self.msft.index).index(end_date_timestamp)
+        for a in self.msft.index:
+            self.date.append(str(a.date()))
+
+        # print(self.date)
