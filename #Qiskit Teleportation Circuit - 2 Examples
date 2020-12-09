@@ -1,0 +1,29 @@
+#Qiskit Teleportation Circuit (GUIDED- Teleporting |1> )
+
+circuit = QuantumCircuit (3,3) #Creating a quantum circuit using 3 classical and 3 quantum bits
+circuit.draw()
+circuit.x(0)
+circuit.barrier()
+
+circuit.h(1)
+circuit.cx(1,2)
+circuit.cx(0,1)
+circuit.h(0)
+
+#measurements
+
+circuit.measure([0,1],[0,1])
+circuit.draw()
+
+circuit.cx(1,2)
+circuit.cz(0,2)
+circuit.measure(2,2)
+
+backend= Aer.get_backend("qasm_simulator")
+counts= execute(circuit,backend,shots=1024).result().get_counts()
+print(counts)
+
+plot_histogram(counts)
+
+# Quantum Teleportation Circuit (SELF - Teleporting the |+> qubit state)
+
